@@ -54,6 +54,8 @@ class Product(db.Model):
     desc = db.Column(db.Text)
     price = db.Column(db.Float)
     img=db.Column(db.String)
+    created_on=db.Column(db.DateTime, index=True, default=dt.utcnow)
+    category_id=db.Column(db.ForeignKey('customer.id'))
 
     def __repr__(self):
         return f'<Item: {self.id}|{self.name}>'
