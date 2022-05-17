@@ -48,9 +48,9 @@ def get_single_product_info(name):
 #     return make_response(f"Product {product.name} was added with an id {product.id}",200)
 
 #customer add item to their cart if they're logged in:
-@api.post('/cart')
+@api.post('/cart/<int:id>')
 @token_auth.login_required()
-def add_item_to_cart():
+def add_item_to_cart(id):
     cart_item = request.get_json()
     cart = Cart(**cart_item)
     cart.save()
@@ -59,16 +59,28 @@ def add_item_to_cart():
     return make_response(f"Product {cart.name} was added with an id {cart.id}",200)
 
 #show cart
-@api.post('/cart')
+# @api.post('/cart')
+# @token_auth.login_required()
+# def cart():
+#     cart_dict = request.get_json()
+#     if not all(key in cart_dict for key in ('name', 'desc', 'price', 'img','category_id')):
+#         abort(400)
+#     cart=Cart()
+#     cart = cart.from_dict(cart_dict)
+#     return make_response(f"Here are the items in your cart: {cart}",200)
+    
+#show cart
+@api.get('/cart')
 @token_auth.login_required()
 def cart():
-    cart_dict = request.get_json()
+    products = g.current_user.add_item_to_cart()
+    products = [product.to_dict() for product in products]
+    cart_dict = Cart.query.all()   
     if not all(key in cart_dict for key in ('name', 'desc', 'price', 'img','category_id')):
         abort(400)
     cart=Cart()
     cart = cart.from_dict(cart_dict)
     return make_response(f"Here are the items in your cart: {cart}",200)
-
 
 # Delete whole cart
 @api.delete('/item/<int:id>')
