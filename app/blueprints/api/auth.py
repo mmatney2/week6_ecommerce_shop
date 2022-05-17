@@ -1,5 +1,5 @@
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
-from app.models import User
+from app.blueprints.api.bs_mods_routes import User
 from flask import g
 
 basic_auth = HTTPBasicAuth()

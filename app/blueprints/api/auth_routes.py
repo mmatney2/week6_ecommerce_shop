@@ -1,5 +1,5 @@
 from .import bp as api
-from app.blueprints.auth.auth import basic_auth
+from .auth import basic_auth
 from flask import make_response, g
 
 @api.get('/token')

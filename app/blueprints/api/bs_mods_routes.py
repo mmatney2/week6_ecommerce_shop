@@ -1,37 +1,24 @@
-from app import db, login
-from flask_login import UserMixin # IS ONLY FOR THE USER MODEL!!!!
+from app import db
 from datetime import datetime as dt, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 
-followers = db.Table('followers',
-    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('followed_id', db.Integer, db.ForeignKey('user.id')),
-)
 
-class User(UserMixin, db.Model):
+
+
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String)
     last_name =  db.Column(db.String)
     email =  db.Column(db.String, unique=True, index=True)
     password =  db.Column(db.String)
     created_on = db.Column(db.DateTime, default=dt.utcnow)
-    icon = db.Column(db.Integer)
     is_admin = db.Column(db.Boolean, default=False)
     token = db.Column(db.String, index=True, unique=True)
     token_exp = db.Column(db.DateTime)
-    posts = db.relationship('Post', backref='author', lazy="dynamic")
-    followed = db.relationship('User',
-            secondary = followers,
-            primaryjoin=(followers.c.follower_id == id),
-            secondaryjoin=(followers.c.followed_id ==id),
-            backref=db.backref('followers', lazy='dynamic'),
-            lazy ='dynamic'
-            )
+    books = db.relationship('Book', backref='shopper', lazy="dynamic")
+   
 
-    ##################################################
-    ############## Methods for Token auth ############
-    ##################################################
     def get_token(self, exp=86400):
         current_time = dt.utcnow()
         # give the user their back token if their is still valid
@@ -53,12 +40,7 @@ class User(UserMixin, db.Model):
             return None
         return u
 
-
-    #########################################
-    ############# End Methods for tokens ####
-    #########################################
-
-    # should return a unique identifing string
+# should return a unique identifing string
     def __repr__(self):
         return f'<User: {self.email} | {self.id}>'
 
@@ -79,7 +61,6 @@ class User(UserMixin, db.Model):
         self.last_name = data['last_name']
         self.email=data['email']
         self.password = self.hash_password(data['password'])
-        self.icon = data['icon']
 
     # save the user to the database
     def save(self):
@@ -89,32 +70,7 @@ class User(UserMixin, db.Model):
     def get_icon_url(self):
         return f'https://avatars.dicebear.com/api/avataaars/{self.icon}.svg'
     
-    #WE want to be able to check if the user if following someone
-    def is_following(self, user_to_check):
-        return self.followed.filter(followers.c.followed_id == user_to_check.id).count()>0
-    
-    #follow a user
-    def follow(self, user):
-        if not self.is_following(user):
-            self.followed.append(user)
-            db.session.commit()
-
-    # unfollow a user
-    def unfollow(self, user):
-        if self.is_following(user):
-            self.followed.remove(user)
-            db.session.commit()
- 
-    # Get all the posts I am following and my own posts
-    def followed_posts(self):
-        # get all posts for the users I am follow
-        followed = Post.query.join(followers, (Post.user_id == followers.c.followed_id)).filter(followers.c.follower_id == self.id)
-        # get all my own posts
-        self_posts = Post.query.filter_by(user_id = self.id)
-        # smoooooshh and sort
-        all_posts = followed.union(self_posts).order_by(Post.date_created.desc())
-        return all_posts
-
+   
     def to_dict(self):
         return {
             'id':self.id,
@@ -122,22 +78,18 @@ class User(UserMixin, db.Model):
             'last_name':self.last_name,
             'email':self.email,
             'created_on':self.created_on,
-            'icon':self.icon,
             'is_admin':self.is_admin,
             'token':self.token
         }
 
-@login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-    # SELECT * FROM user WHERE id = ???
-
-
-class Post(db.Model):
+class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Text)
-    date_created=db.Column(db.DateTime, default=dt.utcnow)
-    date_updated=db.Column(db.DateTime, onupdate=dt.utcnow)
+    title = db.Column(db.Text)
+    author = db.Column(db.String)
+    pages = db.Column(db.Integer)
+    summary = db.Column(db.Text)
+    img = db.Column(db.String)
+    subject = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
@@ -146,6 +98,25 @@ class Post(db.Model):
     def edit(self, new_body):
         self.body=new_body
 
+    def from_dict(self, data):
+        self.title = data['title']
+        self.author = data['author']
+        self.pages=data['pages']
+        self.summary = data['summary']
+        self.img = data['img']
+        self.subject = data['subject']
+
+    def to_dict(self):
+        return {
+            'id':self.id,
+            'title':self.title,
+            'author':self.author,
+            'pages':self.pages,
+            'summary':self.summary,
+            'img': self.img,
+            'subject':self.subject,
+            
+        }
     def save(self):
         db.session.add(self) #adds the post to the db session
         db.session.commit() #save everything in the session to the db
@@ -154,12 +125,7 @@ class Post(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def to_dict(self):
-        return {
-            'id':self.id,
-            'body':self.body,
-            'date_created':self.date_created,
-            'date_updated':self.date_updated,
-            'user_id':self.user_id,
-            'author':self.author.first_name +' '+ self.author.last_name
-        }
+# Create new Books
+# {
+#     "title":"my books name"
+# 
