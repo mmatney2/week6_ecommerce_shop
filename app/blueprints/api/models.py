@@ -11,7 +11,12 @@ class Customer(UserMixin, db.Model):
     email =  db.Column(db.String, unique=True, index=True)
     password =  db.Column(db.String)
     created_on = db.Column(db.DateTime, default=dt.utcnow)
-    products = db.relationship("Product", backref="shopper", lazy='dynamic')
+    product = db.relationship("Product", 
+                    secondary = "cart",
+                    backref="shopper", 
+                    lazy='dynamic')
+
+    
     
     def __repr__(self):
         return f'<User: {self.id}|{self.first_name}>'

@@ -21,12 +21,12 @@ def get_product():
     products_dicts = [products.to_dict() for product in products]
     return make_response({"products":products_dicts},200)
 
-@api.get('/product')
+@api.get('/product/<string:name>')
 # @token_auth.login_required()
-def get_single_product_info(id):
+def get_single_product_info(name):
     product_dict = request.get_json()
 
-    ps = Product.query.get(id)
+    ps = Product.query.get(name)
     for p in ps:
         if not p:
             abort(404)
@@ -35,7 +35,7 @@ def get_single_product_info(id):
         p.save()
         return make_response(f"Product {p.name} with ID {p.id} has the following details. ", 200)
         
-@api.get('/')
+@api.post('/cart')
 @token_auth.login_required()
 def add_item_to_cart(id):
     cart_dict = request.get_json()
@@ -46,7 +46,7 @@ def add_item_to_cart(id):
     product.save()
     return make_response(f"Product {product.name} was created with an id {product.id}",200)
 
-@api.get('/cart')
+@api.post('/cart')
 @token_auth.login_required()
 def cart(self, item):
     cart_dict = request.get_json()
