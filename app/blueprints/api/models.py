@@ -11,7 +11,7 @@ class Customer(UserMixin, db.Model):
     email =  db.Column(db.String, unique=True, index=True)
     password =  db.Column(db.String)
     created_on = db.Column(db.DateTime, default=dt.utcnow)
-    product = db.relationship("Product", 
+    products = db.relationship("Products", 
                     secondary = "cart",
                     backref="shopper", 
                     lazy='dynamic')
