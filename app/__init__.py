@@ -23,9 +23,12 @@ def create_app(config_class=Config):
     #Configure Some Settings
     
 
-   
+    from .blueprints.auth import bp as auth_bp
+    app.register_blueprint(auth_bp)
+
 
     from .blueprints.api import bp as api_bp
     app.register_blueprint(api_bp)
 
+    
     return app

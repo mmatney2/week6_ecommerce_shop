@@ -16,7 +16,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     token = db.Column(db.String, index=True, unique=True)
     token_exp = db.Column(db.DateTime)
-    books = db.relationship('Book', backref='shopper', lazy="dynamic")
+    products = db.relationship('Cart', backref='shopper', lazy="dynamic")
    
 
     def get_token(self, exp=86400):
@@ -82,50 +82,51 @@ class User(db.Model):
             'token':self.token
         }
 
-class Book(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Text)
-    author = db.Column(db.String)
-    pages = db.Column(db.Integer)
-    summary = db.Column(db.Text)
-    img = db.Column(db.String)
-    subject = db.Column(db.Text)
+class Cart(db.Model):
+    cart_id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
+class Product(db.Model):
+    id=db.Column(db.Integer, primary_key=True)
+    name=db.Column(db.String)
+    desc = db.Column(db.Text)
+    price = db.Column(db.Float)
+    img=db.Column(db.String)
+    created_on=db.Column(db.DateTime, index=True, default=dt.utcnow)
+    # category_id=db.Column(db.ForeignKey('customer.id'))
+
     def __repr__(self):
-        return f'<Post: {self.id} | {self.body[:15]}>'
+        return f'<Item: {self.id}|{self.name}>'
 
-    def edit(self, new_body):
-        self.body=new_body
+    def edit(self, new_desc):
+        self.body=new_desc
 
-    def from_dict(self, data):
-        self.title = data['title']
-        self.author = data['author']
-        self.pages=data['pages']
-        self.summary = data['summary']
-        self.img = data['img']
-        self.subject = data['subject']
-
-    def to_dict(self):
-        return {
-            'id':self.id,
-            'title':self.title,
-            'author':self.author,
-            'pages':self.pages,
-            'summary':self.summary,
-            'img': self.img,
-            'subject':self.subject,
-            
-        }
     def save(self):
-        db.session.add(self) #adds the post to the db session
-        db.session.commit() #save everything in the session to the db
-    
+        db.session.add(self)
+        db.session.commit()
+
     def delete(self):
         db.session.delete(self)
         db.session.commit()
 
-# Create new Books
+    def to_dict(self):
+        return {
+            'id':self.id,
+            'name':self.name,
+            'desc':self.desc,
+            'price':self.price,
+            'img':self.img,
+            'created_on':self.created_on,
+        }
+
+    def from_dict(self, data):
+        for field in ['name','desc','price','img','category_id']:
+            if field in data:
+                    #the object, the attribute, value
+                setattr(self, field, data[field])
+
+# Create new Products
 # {
-#     "title":"my books name"
+#     "title":"my products name"
 # 
