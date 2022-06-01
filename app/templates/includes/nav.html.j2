@@ -6,18 +6,18 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                {% if current_user.is_authenticated %}
+                {% if current_user %}
                 
-                <a class="nav-link" href="{{url_for('api.index')}}">Find Products</a>
+                <a class="nav-link" href="{{url_for('store.index')}}">Find Products</a>
 
                 {% else %}
                 <a class="nav-link" href="{{url_for('auth.login')}}">Login</a>
                 <a class="nav-link" href="{{url_for('auth.register')}}">Register</a>
                 {% endif %}
             </div>
-                {% if current_user.is_authenticated %}
+                {% if current_user %}
                 <ul class="navbar-nav ms-auto align-items-center">
-                <a href="{{url_for('api.index')}}">
+                <a href="{{url_for('store.index')}}">
                     <img src="{{current_user.get_icon_url()}}" style="height:50px;">
                 </a>
                 <li class="nav-item">

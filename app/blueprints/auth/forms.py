@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, RadioField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError
-from app.blueprints.api.bs_mods_routes import User
+from app.blueprints.store.models import User
 import random
 from jinja2.utils import markupsafe 
 

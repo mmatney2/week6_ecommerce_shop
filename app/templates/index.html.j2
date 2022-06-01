@@ -5,7 +5,7 @@
 
 {% block content %}
 
-    <div class="container box_container"  >
+    <div class="container box_container" >
         <div>
             <h1 class="card" style="border-radius: 50%; width: 30%;">List of products</h1></a>
         </div>
@@ -14,20 +14,17 @@
         <div class="row">
             
             {% for product in products %}
-            <form method="POST" action="{{url_for('api.index')}}/?product_id={{product.id}}&user_id={{product.user_id}}">
+            <form method="POST" action="{{url_for('store.index')}}/?product_id={{product.id}}&user_id={{product.user_id}}">
                 Product: {{product.name}}
                 id: {{product.id}}
                 desc:{{product.desc}}
                 price:{{product.price}}
-                img:{{product.img}}
-                created_on:{{product.created_on}}
-                
                 <img src="{{product.img}}" />
+                created_on:{{product.created_on}}
+                {% include './includes/_post.html.j2' %}
+
                 <br>
                 User First Name: <strong>{{product.user_id}}</strong>
-
-
-
                 <button type="submit" class="btn btn-primary">Adding Product</button>               
             </form>
             {% endfor %}        

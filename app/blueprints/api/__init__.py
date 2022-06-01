@@ -1,5 +1,5 @@
-from flask import Blueprint
+# from flask import Blueprint
 
-bp = Blueprint('api', __name__, url_prefix='/api')
+# bp = Blueprint('api', __name__, url_prefix='/api')
 
-from .import   bs_mods_routes, routes
+# from .import   bs_mods_routes, routes, auth_routes, auth
