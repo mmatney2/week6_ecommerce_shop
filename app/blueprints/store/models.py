@@ -2,18 +2,25 @@ from app import db
 from datetime import datetime as dt, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
+from app import db, login
+from flask_login import UserMixin # IS ONLY FOR THE USER MODEL!!!!
+from datetime import datetime as dt, timedelta
+from werkzeug.security import generate_password_hash, check_password_hash
+import secrets
 
 
 
-
-class User(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String)
     last_name =  db.Column(db.String)
     email =  db.Column(db.String, unique=True, index=True)
     password =  db.Column(db.String)
     created_on = db.Column(db.DateTime, default=dt.utcnow)
-    products = db.relationship('Cart', backref='shopper', lazy="dynamic")
+    products = db.relationship('Product', 
+                    secondary="cart", 
+                    backref='shopper', 
+                    lazy="dynamic")
    
 
    
@@ -54,13 +61,17 @@ class User(db.Model):
             'email':self.email,
             'created_on':self.created_on,
         }
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+    # SELECT * FROM user WHERE id = ???
 
-class Cart(db.Model):
+class Cart(UserMixin, db.Model):
     cart_id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-class Product(db.Model):
+class Product(UserMixin, db.Model):
     id=db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String)
     desc = db.Column(db.Text)
@@ -97,3 +108,7 @@ class Product(db.Model):
             if field in data:
                     #the object, the attribute, value
                 setattr(self, field, data[field])
+
+    def cart_items(self, cart_item):
+        db.session.append(cart_item)
+        db.session.commit()

@@ -1,0 +1,9 @@
+{% extends 'base.html.j2' %}
+{% block title %}
+    {{product.name}}
+{% endblock %}
+
+{% block content %}
+            {# includes #}
+    {% include 'includes/_product.html.j2' %}
+{% endblock %}

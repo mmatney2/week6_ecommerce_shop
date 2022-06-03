@@ -7,25 +7,25 @@
 
     <div class="container box_container" >
         <div>
-            <h1 class="card" style="border-radius: 50%; width: 30%;">List of products</h1></a>
+            <h1 class="card" style="border-radius: 50%; width: 30%;">List of products</h1>
         </div>
     
-        <h1 style="color:darkgreen">Products</h1>
+        {# <h1 style="color:darkgreen">Products</h1> #}
         <div class="row">
             
             {% for product in products %}
-            <form method="POST" action="{{url_for('store.index')}}/?product_id={{product.id}}&user_id={{product.user_id}}">
+            <form method="GET" action="{{url_for('store.add_to_cart', id=product.id)}}">
                 Product: {{product.name}}
                 id: {{product.id}}
                 desc:{{product.desc}}
                 price:{{product.price}}
                 <img src="{{product.img}}" />
                 created_on:{{product.created_on}}
-                {% include './includes/_post.html.j2' %}
+                {% include './includes/_product.html.j2' %}
 
                 <br>
-                User First Name: <strong>{{product.user_id}}</strong>
-                <button type="submit" class="btn btn-primary">Adding Product</button>               
+                {# User First Name: <strong>{{product.user_id}}</strong> #}
+                <br>
             </form>
             {% endfor %}        
 

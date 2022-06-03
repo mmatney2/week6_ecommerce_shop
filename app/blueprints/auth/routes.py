@@ -1,9 +1,8 @@
 from flask import render_template, request, flash, redirect, url_for
-from .forms import EditProfileForm, LoginForm, RegisterForm
+from .forms import  LoginForm, RegisterForm, EditProfileForm
 from .import bp as auth
 from app.blueprints.store.models import User
 from flask_login import current_user, logout_user, login_user, login_required
-
 
 @auth.route('/login', methods=['GET','POST'])
 def login():
@@ -17,7 +16,7 @@ def login():
         u=User.query.filter_by(email=email).first()
         if u and u.check_hashed_password(password):
             login_user(u)
-            flash('Welcome to The Store!','success')
+            flash('Welcome to Fakebook!','success')
             return redirect(url_for('store.index'))
         flash('Incorrect Email Password Combo', 'danger')
         return render_template('login.html.j2', form=form)
@@ -34,6 +33,7 @@ def register():
                 "last_name": form.last_name.data.title(),
                 "email":form.email.data.lower(),
                 "password":form.password.data,
+                "icon":form.icon.data
             }
             # Create an empty User
             new_user_object = User()
@@ -47,7 +47,7 @@ def register():
             return render_template('register.html.j2', form=form)
         flash('You have successfully registered!', 'success')
         return redirect(url_for('auth.login'))
-    return render_template('register.html.j2', form=form, current_user=current_user)
+    return render_template('register.html.j2', form=form)
 
 @auth.route('/edit_profile', methods=['GET','POST'])
 def edit_profile():
@@ -58,6 +58,7 @@ def edit_profile():
                 "last_name": form.last_name.data.title(),
                 "email":form.email.data.lower(),
                 "password":form.password.data,
+                "icon":int(form.icon.data) if int(form.icon.data) != 9000 else current_user.icon
             }
         user = User.query.filter_by(email=new_user_data["email"]).first()
         if user and user.email != current_user.email:
@@ -70,7 +71,7 @@ def edit_profile():
         except:
             flash('Ther was an unexpected. Please Try again', 'danger')
             return redirect(url_for('auth.edit_profile'))
-        return redirect(url_for('store.index'))
+        return redirect(url_for('social.index'))
     return render_template('register.html.j2', form=form)
 
 @auth.route('/logout')

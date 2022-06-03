@@ -1,6 +1,6 @@
 {% extends 'base.html.j2' %}
 {% block title %}
-  {% if current_user %}
+  {% if current_user.is_authenticated %}
     Edit Profile
   {% else %}
     Register
@@ -9,17 +9,25 @@
 
 {% block content %}
 <h1>
-  {% if current_user %}
+  {% if current_user.is_authenticated %}
   Edit Profile
   {% else %}
   Register
   {% endif %}
 </h1>
-{# <form action="{{url_for('auth.edit_profile') if current_user.is_authenticated else url_for('auth.register')}}" method = "POST"> #}
+<form action="{{url_for('auth.edit_profile') if current_user.is_authenticated else url_for('auth.register')}}" method = "POST">
 
   {{form.hidden_tag()}}
 
-  
+  <div>
+  {{form.icon.label(class="form-label")}}
+  <div>
+    {% for subfield in form.icon %}
+      {{subfield}}
+      {{subfield.label | safe}}
+    {% endfor %}
+  </div>
+  </div>
 
   <div>
   {{form.first_name.label(class="form-label")}}

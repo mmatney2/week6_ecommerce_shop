@@ -4,87 +4,48 @@ from flask_login import login_required, current_user
 from .models import Product, Cart, User
 
 # ROUTES
-#register a user:
 
-@store.post("/user")
-def post_item():
-    user_dict=request.get_json()
-    users = User()
-    users.from_dict(user_dict)
-    users.save()
-    return render_template()    
 
-# Create new Cat
-# {
-#     "name":"my cat name"
-# }
-@store.post('/product')
-def post_category():
-    prod_name = request.get_json().get("name")
-    product = Product(name = prod_name)
-    product.save()
-    return make_response(f"category {product.id} with name {product.name} created", 200)    
-
-# Get all Products 2
-@store.get('/product')
-def get_product():
+#show all available products
+@store.route('/', methods = ['GET', 'POST'])
+def index():
     products=Product.query.all()
-    product_dicts=[product.to_dict() for product in products]
-    return make_response({"products":product_dicts},200)
-
+    return render_template('index.html.j2', products=products)
   
 #return single product 3:
-
-@store.get('/product/<int:id>')
-def get_post(id):
+@store.route('/product/<int:id>')
+def get_a_product(id):
     product = Product.query.get(id)
-    if not product:
-        abort(404)
-    product_dict= product.to_dict() 
-    return make_response(product_dict, 200)       
+    return render_template('single_product.html.j2', product=product, view_all=True)
 
-#customer add item to their cart if they're logged in 4:
-@store.post('/cart/<int:id>')
-def add_item_to_cart(id):
-    products = Product.query.get(id)
-    if not products:
-        abort(404)
-    cart=Cart()
-    cart.save()
-    add_items_to_cart = [item.to_dict() for item in products.products]
-    g.current_user.products.append(cart)
-    g.current_user.save()
-    return make_response({"Product": add_items_to_cart},200)
+#add to cart
+@store.route('/cart/<int:id>')
+@login_required
+def add_to_cart(id):
+    product=Product.query.get(id)
+    if product:
+        current_user.products.append(product)
+        flash(f"{product.name} has been added to your cart", "success")
+    else:
+        flash("That item does not exist")
+    return redirect(url_for('store.index'))
 
-#show cart 5
-@store.get('/cart')
+
+@store.route('/cart', methods=['GET', 'POST'])
+@login_required
 def cart():
-    products = g.current_user.add_item_to_cart()
-    products = [product.to_dict() for product in products]
-    cart_dict = Cart.query.all()   
-    if not all(key in cart_dict for key in ('name', 'desc', 'price', 'img','category_id')):
-        abort(400)
-    cart=Cart()
-    cart = cart.from_dict(cart_dict)
-    return make_response(f"Here are the items in your cart: {cart}",200)
+    cart=Cart.query.all()
+    return render_template("cart.html.j2", cart=cart )
 
-
-# Delete whole cart 6
-@store.delete('/item/<int:id>')
-def delete_cart(id):
-    product_to_delete = Product.query.get(id)
-    if not product_to_delete:
-        abort(404)
-    product_to_delete.delete()
-    return make_response(f"Item with id: {id} has been deleted", 200)
-
-# Delete a Item by ID 7
-@store.delete('/item/<int:id>')
+@store.route('/delete_item/<int:id>')
+@login_required
 def delete_item(id):
-    product_to_delete = Product.query.get(id)
-    for p in product_to_delete:
-        if not p:
-            abort(404)
-        p.delete()
-    return make_response(f"Item with id: {id} has been deleted", 200)
+    cart = Cart.query.get(id)
+    if cart and cart.cart_id != current_user.id:
+        flash('error', 'danger')
+        return redirect(url_for('store.index'))
+    cart.delete()
+    flash('You successfully removed item', 'info')
+    return redirect(request.referrer or url_for('store.index'))
+
 
