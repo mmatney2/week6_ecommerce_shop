@@ -52,6 +52,12 @@ class User(UserMixin, db.Model):
         db.session.add(self) #adds the user to the db session
         db.session.commit() #save everythig in the session to the db
 
+    def cart_items(self, cart_item):
+        self.products.append(cart_item)
+        db.session.commit()
+    def remove_item(self, cart_item):
+        self.products.remove(cart_item)
+        db.session.commit()
 
     def to_dict(self):
         return {
@@ -110,5 +116,9 @@ class Product(UserMixin, db.Model):
                 setattr(self, field, data[field])
 
     def cart_items(self, cart_item):
-        db.session.append(cart_item)
+        self.products.append(cart_item)
+        db.session.commit()
+
+    def remove_item(self, cart_item):
+        self.products.remove(cart_item)
         db.session.commit()

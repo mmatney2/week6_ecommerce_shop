@@ -1,5 +1,17 @@
 {% extends 'base.html.j2' %}
 {% block title %}
+    {{product.name}}
+{% endblock %}
+
+{% block content %}
+            {# includes #}
+    {% include 'includes/_cart_card.html.j2' %}
+{% endblock %}
+
+
+
+{# {% extends 'base.html.j2' %}
+{% block title %}
   Cart
 {% endblock %}
 <h1></h1>
@@ -18,7 +30,7 @@
     </div>
     <div class="col-md-8">
       <div class="card-body">
-        <h5 class="card-title">{{product.name}}  product: </h5>
+        <h5 class="card-title">{{product.name}} </h5>
         
         {% if view_all %}
             <p class="card-text">{{product.desc}}</p>
@@ -34,4 +46,4 @@
     </div>
   </div>
 </div>
-{% endblock %}
+{% endblock %} #}
